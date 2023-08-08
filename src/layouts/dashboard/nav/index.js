@@ -12,8 +12,6 @@ import {
   Avatar,
   Stack,
 } from "@mui/material";
-// mock
-import account from "../../../_mock/account";
 // hooks
 import useResponsive from "../../../hooks/useResponsive";
 // components
@@ -22,6 +20,7 @@ import Scrollbar from "../../../components/scrollbar";
 import NavSection from "../../../components/nav-section";
 //
 import navConfig from "./config";
+import { useSelector } from "react-redux";
 
 // ----------------------------------------------------------------------
 
@@ -44,7 +43,7 @@ Nav.propTypes = {
 
 export default function Nav({ openNav, onCloseNav }) {
   const { pathname } = useLocation();
-
+  const { user } = useSelector((state) => state.user);
   const isDesktop = useResponsive("up", "lg");
 
   useEffect(() => {
@@ -72,15 +71,20 @@ export default function Nav({ openNav, onCloseNav }) {
       <Box sx={{ mb: 5, mx: 2.5 }}>
         <Link underline="none">
           <StyledAccount>
-            <Avatar src={account.photoURL} alt="photoURL" />
+            <Avatar
+              src={
+                user?.profilePic || "/assets/images/avatars/avatar_default.jpg"
+              }
+              alt="photoURL"
+            />
 
             <Box sx={{ ml: 2 }}>
               <Typography variant="subtitle2" sx={{ color: "text.primary" }}>
-                {account.displayName}
+                {user?.fullName}
               </Typography>
 
               <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                {account.role}
+                {user?.userType}
               </Typography>
             </Box>
           </StyledAccount>

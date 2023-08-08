@@ -39,7 +39,16 @@ request.interceptors.response.use(
       toast.error(error?.message);
     }
     if (error?.response?.status === 401) {
+      document.querySelectorAll("*").forEach((ele) => {
+        ele.style.pointerEvents = "none";
+      });
       // logout user from store
+      localStorage.removeItem("token");
+      toast.error("Session expired, please login again.");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     }
     return Promise.reject(error);
   }

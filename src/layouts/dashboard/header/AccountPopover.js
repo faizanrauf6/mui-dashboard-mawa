@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 // @mui
 import { alpha } from "@mui/material/styles";
 import {
@@ -11,16 +12,19 @@ import {
   IconButton,
   Popover,
 } from "@mui/material";
-// mocks_
-import account from "../../../_mock/account";
+import { useSelector, useDispatch } from "react-redux";
+import { clearUser } from "src/store/userSlice";
+import request from "src/utils/request";
+import { api } from "src/constants";
+import { toast } from "react-toastify";
 
 // ----------------------------------------------------------------------
 
 const MENU_OPTIONS = [
-  {
-    label: "Home",
-    icon: "eva:home-fill",
-  },
+  // {
+  //   label: "Home",
+  //   icon: "eva:home-fill",
+  // },
   {
     label: "Profile",
     icon: "eva:person-fill",
@@ -35,6 +39,9 @@ const MENU_OPTIONS = [
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const { user } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
@@ -42,6 +49,21 @@ export default function AccountPopover() {
 
   const handleClose = () => {
     setOpen(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await request.post(api.auth.logout, {
+        userId: user?._id,
+      });
+      toast.success(response?.data?.message || "Logout Successful");
+
+      // Setting token and user details to empty or null
+      localStorage.removeItem("token"); // Clear token
+      dispatch(clearUser());
+
+      navigate("/", { replace: true });
+    } catch (error) {}
   };
 
   return (
@@ -63,7 +85,10 @@ export default function AccountPopover() {
           }),
         }}
       >
-        <Avatar src={account.photoURL} alt="photoURL" />
+        <Avatar
+          src={user?.profilePic || "/assets/images/avatars/avatar_default.jpg"}
+          alt="photoURL"
+        />
       </IconButton>
 
       <Popover
@@ -87,10 +112,10 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {account.displayName}
+            {user?.fullName}
           </Typography>
           <Typography variant="body2" sx={{ color: "text.secondary" }} noWrap>
-            {account.email}
+            {user?.username}
           </Typography>
         </Box>
 
@@ -106,7 +131,7 @@ export default function AccountPopover() {
 
         <Divider sx={{ borderStyle: "dashed" }} />
 
-        <MenuItem onClick={handleClose} sx={{ m: 1 }}>
+        <MenuItem onClick={handleLogout} sx={{ m: 1 }}>
           Logout
         </MenuItem>
       </Popover>

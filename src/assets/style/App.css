@@ -1,0 +1,4 @@
+#nprogress {
+  z-index: 999999;
+  position: relative;
+}

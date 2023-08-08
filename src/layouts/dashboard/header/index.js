@@ -44,7 +44,7 @@ Header.propTypes = {
 
 export default function Header({ onOpenNav }) {
   return (
-    <StyledRoot>
+    <StyledRoot className="dashboard-header">
       <StyledToolbar>
         <IconButton
           onClick={onOpenNav}

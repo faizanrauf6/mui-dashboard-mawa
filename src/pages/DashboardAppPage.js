@@ -17,11 +17,41 @@ import {
   AppCurrentSubject,
   AppConversionRates,
 } from "../sections/@dashboard/app";
+import { useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import request from "src/utils/request";
+import { api } from "src/constants";
+import { toast } from "react-toastify";
 
 // ----------------------------------------------------------------------
 
 export default function DashboardAppPage() {
   const theme = useTheme();
+  const { user } = useSelector((state) => state.user);
+  const [dashboardData, setDashboardData] = useState({
+    totalUsers: 0,
+    totalOrders: 0,
+    totalMessages: 0,
+    totalMessagesCount: 0,
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await request.post(api.dashboardInfo, {
+          userId: user._id,
+        });
+        console.log(response);
+        setDashboardData(response?.data?.data);
+      } catch (error) {
+        // Handle error
+      }
+    };
+
+    if (user?._id) {
+      fetchData();
+    }
+  }, [user]);
 
   return (
     <>
@@ -31,40 +61,40 @@ export default function DashboardAppPage() {
 
       <Container maxWidth="xl">
         <Typography variant="h4" sx={{ mb: 5 }}>
-          Hi, Welcome back
+          Hi {user?.fullName}, Welcome back
         </Typography>
 
         <Grid container spacing={3}>
           <Grid item xs={12} sm={6} md={3}>
             <AppWidgetSummary
-              title="Weekly Sales"
-              total={714000}
-              icon={"ant-design:android-filled"}
+              title="Total Users"
+              total={String(dashboardData?.totalUsers)}
+              icon={"raphael:users"}
             />
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
             <AppWidgetSummary
-              title="New Users"
-              total={1352831}
+              title="Total Tasks"
+              total={String(dashboardData?.totalOrders)}
               color="info"
-              icon={"ant-design:apple-filled"}
+              icon={"material-symbols:draft-orders-rounded"}
             />
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
             <AppWidgetSummary
-              title="Item Orders"
-              total={1723315}
+              title="Total Messages"
+              total={String(dashboardData?.totalMessages)}
               color="warning"
-              icon={"ant-design:windows-filled"}
+              icon={"bi:chat-fill"}
             />
           </Grid>
 
           <Grid item xs={12} sm={6} md={3}>
             <AppWidgetSummary
-              title="Bug Reports"
-              total={234}
+              title="Total Complaints"
+              total={String(dashboardData?.totalComplaints)}
               color="error"
               icon={"ant-design:bug-filled"}
             />

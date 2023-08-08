@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, Navigate } from "react-router-dom";
 // @mui
 import { styled } from "@mui/material/styles";
 //
 import Header from "./header";
 import Nav from "./nav";
+import { useSelector, useDispatch } from "react-redux";
+import request from "src/utils/request";
+import { api } from "src/constants";
+import { fetchMe, setUser } from "src/store/userSlice";
+import BaseLoader from "src/components/base/BaseLoader";
 
 // ----------------------------------------------------------------------
 
@@ -33,20 +38,40 @@ const Main = styled("div")(({ theme }) => ({
 // ----------------------------------------------------------------------
 
 export default function DashboardLayout() {
+  const { user, loading } = useSelector((state) => state.user);
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+
+  const getCurrentUser = async () => {
+    try {
+      const response = await fetchMe(api.auth.me)(dispatch);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      getCurrentUser();
+    }
+  }, [user]);
 
   return (
     // <Navigate replace to="/error-page" />
     localStorage.getItem("token") ? (
-      <StyledRoot>
-        <Header onOpenNav={() => setOpen(true)} />
+      loading ? (
+        <BaseLoader />
+      ) : (
+        <StyledRoot>
+          <Header onOpenNav={() => setOpen(true)} />
 
-        <Nav openNav={open} onCloseNav={() => setOpen(false)} />
+          <Nav openNav={open} onCloseNav={() => setOpen(false)} />
 
-        <Main>
-          <Outlet />
-        </Main>
-      </StyledRoot>
+          <Main>
+            <Outlet />
+          </Main>
+        </StyledRoot>
+      )
     ) : (
       <Navigate replace to="/" />
     )

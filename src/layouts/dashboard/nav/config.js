@@ -1,5 +1,5 @@
 // component
-import SvgColor from "../../../components/svg-color";
+import SvgColor from '../../../components/svg-color';
 
 // ----------------------------------------------------------------------
 
@@ -12,19 +12,24 @@ const icon = (name) => (
 
 const navConfig = [
   {
-    title: "dashboard",
-    path: "/dashboard/app",
-    icon: icon("ic_analytics"),
+    title: 'dashboard',
+    path: '/dashboard/app',
+    icon: icon('ic_analytics'),
   },
   {
-    title: "user",
-    path: "/dashboard/user",
-    icon: icon("ic_user"),
+    title: 'complaints',
+    path: '/dashboard/complaints',
+    icon: icon('ic_lock'),
   },
   {
-    title: "outing",
-    path: "/dashboard/outings",
-    icon: icon("ic_cart"),
+    title: 'users',
+    path: '/dashboard/user',
+    icon: icon('ic_user'),
+  },
+  {
+    title: 'outings',
+    path: '/dashboard/outings',
+    icon: icon('ic_cart'),
   },
   // {
   //   title: 'blog',

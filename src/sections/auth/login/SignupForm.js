@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 // @mui
 import {
   Link,
@@ -8,43 +8,43 @@ import {
   InputAdornment,
   TextField,
   Checkbox,
-} from "@mui/material";
-import { LoadingButton } from "@mui/lab";
+} from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 // components
-import Iconify from "../../../components/iconify";
-import { toast } from "react-toastify";
-import request from "src/utils/request";
-import { api } from "src/constants";
+import Iconify from '../../../components/iconify';
+import { toast } from 'react-toastify';
+import request from 'src/utils/request';
+import { api } from 'src/constants';
 // ----------------------------------------------------------------------
 
 export default function SignupForm() {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [user, setUser] = useState({
-    username: "",
-    fullName: "",
-    password: "",
-    userType: "Admin",
-    language: "en-US",
+  const [userDetails, setUserDetails] = useState({
+    username: '',
+    fullName: '',
+    password: '',
+    userType: 'Admin',
+    language: 'en-US',
     fcmToken:
-      "fLmZLv9FoUNMj5HQIcb4MA:APA91bFKnZtz4TXt5A3zilEn8cvyjTbBkmVi1gckSSeJxK9iBF6qriLU9FqcF5XDSd-6Aaf_TGPZDIsRC82HQcP12yd7jNLo7itBVKRSUqk-k6VKGFDtu55sGHj4kp3DxBozvqT7RxF2",
+      'fLmZLv9FoUNMj5HQIcb4MA:APA91bFKnZtz4TXt5A3zilEn8cvyjTbBkmVi1gckSSeJxK9iBF6qriLU9FqcF5XDSd-6Aaf_TGPZDIsRC82HQcP12yd7jNLo7itBVKRSUqk-k6VKGFDtu55sGHj4kp3DxBozvqT7RxF2',
   });
 
   const handleSubmit = async () => {
     try {
-      const response = await request.post(api.auth.signup, user);
-      toast.success(response?.data?.message || "Signup successful");
-      navigate("/", { replace: true });
+      const response = await request.post(api.auth.signup, userDetails);
+      toast.success('Signup Successful' || response?.data?.message);
+      navigate('/', { replace: true });
     } finally {
-      setUser({
-        username: "",
-        fullName: "",
-        password: "",
-        userType: "Admin",
-        language: "en-US",
+      setUserDetails({
+        username: '',
+        fullName: '',
+        password: '',
+        userType: 'Admin',
+        language: 'en-US',
         fcmToken:
-          "fLmZLv9FoUNMj5HQIcb4MA:APA91bFKnZtz4TXt5A3zilEn8cvyjTbBkmVi1gckSSeJxK9iBF6qriLU9FqcF5XDSd-6Aaf_TGPZDIsRC82HQcP12yd7jNLo7itBVKRSUqk-k6VKGFDtu55sGHj4kp3DxBozvqT7RxF2",
+          'fLmZLv9FoUNMj5HQIcb4MA:APA91bFKnZtz4TXt5A3zilEn8cvyjTbBkmVi1gckSSeJxK9iBF6qriLU9FqcF5XDSd-6Aaf_TGPZDIsRC82HQcP12yd7jNLo7itBVKRSUqk-k6VKGFDtu55sGHj4kp3DxBozvqT7RxF2',
       });
     }
     // navigate("/dashboard", { replace: true });
@@ -52,7 +52,7 @@ export default function SignupForm() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setUser((prevUser) => ({
+    setUserDetails((prevUser) => ({
       ...prevUser,
       [name]: value,
     }));
@@ -62,33 +62,33 @@ export default function SignupForm() {
     <>
       <Stack spacing={3}>
         <TextField
-          name="username"
-          label="Enter Username"
-          value={user.username}
+          name='username'
+          label='Enter Username'
+          value={userDetails.username}
           onChange={handleInputChange}
         />
         <TextField
-          name="fullName"
-          label="Enter Full Name"
-          value={user.fullName}
+          name='fullName'
+          label='Enter Full Name'
+          value={userDetails.fullName}
           onChange={handleInputChange}
         />
 
         <TextField
-          name="password"
-          label="Enter Password"
-          type={showPassword ? "text" : "password"}
-          value={user.password}
+          name='password'
+          label='Enter Password'
+          type={showPassword ? 'text' : 'password'}
+          value={userDetails.password}
           onChange={handleInputChange}
           InputProps={{
             endAdornment: (
-              <InputAdornment position="end">
+              <InputAdornment position='end'>
                 <IconButton
                   onClick={() => setShowPassword(!showPassword)}
-                  edge="end"
+                  edge='end'
                 >
                   <Iconify
-                    icon={showPassword ? "eva:eye-fill" : "eva:eye-off-fill"}
+                    icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'}
                   />
                 </IconButton>
               </InputAdornment>
@@ -98,9 +98,9 @@ export default function SignupForm() {
       </Stack>
 
       <Stack
-        direction="row"
-        alignItems="end"
-        justifyContent="end"
+        direction='row'
+        alignItems='end'
+        justifyContent='end'
         sx={{ my: 2 }}
       >
         {/* <Checkbox name="remember" label="Remember me" /> */}
@@ -111,9 +111,9 @@ export default function SignupForm() {
 
       <LoadingButton
         fullWidth
-        size="large"
-        type="submit"
-        variant="contained"
+        size='large'
+        type='submit'
+        variant='contained'
         onClick={handleSubmit}
       >
         Signup
