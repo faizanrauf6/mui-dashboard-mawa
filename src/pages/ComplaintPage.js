@@ -21,6 +21,7 @@ import {
   IconButton,
   TableContainer,
   TablePagination,
+  Divider,
 } from "@mui/material";
 // components
 import Label from "../components/label";
@@ -280,7 +281,7 @@ export default function ComplaintPage() {
                             <Stack
                               direction="row"
                               alignItems="center"
-                              spacing={2}
+                              spacing={1}
                             >
                               <Avatar
                                 alt={complaintBy?.fullName}
@@ -289,9 +290,14 @@ export default function ComplaintPage() {
                                   "/assets/images/avatars/avatar_default.jpg"
                                 }
                               />
-                              <Typography variant="subtitle2" noWrap>
-                                {complaintBy?.fullName}
-                              </Typography>
+                              <Stack direction="column">
+                                <Typography variant="subtitle2" noWrap>
+                                  {complaintBy?.fullName}
+                                </Typography>
+                                <Typography variant="subtitle3" noWrap>
+                                  (Employer)
+                                </Typography>
+                              </Stack>
                             </Stack>
                           </TableCell>
 
@@ -303,7 +309,7 @@ export default function ComplaintPage() {
                             <Stack
                               direction="row"
                               alignItems="center"
-                              spacing={2}
+                              spacing={1}
                             >
                               <Avatar
                                 alt={complaintAgainst?.fullName}
@@ -312,9 +318,14 @@ export default function ComplaintPage() {
                                   "/assets/images/avatars/avatar_default.jpg"
                                 }
                               />
-                              <Typography variant="subtitle2" noWrap>
-                                {complaintAgainst?.fullName}
-                              </Typography>
+                              <Stack direction="column">
+                                <Typography variant="subtitle2" noWrap>
+                                  {complaintAgainst?.fullName}
+                                </Typography>
+                                <Typography variant="subtitle3" noWrap>
+                                  (Worker)
+                                </Typography>
+                              </Stack>
                             </Stack>
                           </TableCell>
 
@@ -395,7 +406,7 @@ export default function ComplaintPage() {
         PaperProps={{
           sx: {
             p: 1,
-            width: 140,
+            width: 160,
             "& .MuiMenuItem-root": {
               px: 1,
               typography: "body2",
@@ -409,9 +420,16 @@ export default function ComplaintPage() {
           Change Status
         </MenuItem> */}
 
-        <MenuItem sx={{ color: "error.main", width: 180 }}>
-          <Iconify icon={"eva:edit-fill"} sx={{ mr: 1 }} />
-          Change Status
+        <MenuItem sx={{ color: "success.main" }}>
+          <Iconify icon={"teenyicons:file-tick-outline"} sx={{ mr: 1 }} />
+          Resolve
+        </MenuItem>
+
+        <Divider />
+
+        <MenuItem sx={{ color: "error.main" }}>
+          <Iconify icon={"ri:file-excel-line"} sx={{ mr: 1 }} />
+          Reject
         </MenuItem>
       </Popover>
     </>
