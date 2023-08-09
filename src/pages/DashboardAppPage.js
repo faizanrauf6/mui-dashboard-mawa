@@ -34,6 +34,7 @@ export default function DashboardAppPage() {
     totalMessages: 0,
     totalMessagesCount: 0,
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,6 +46,8 @@ export default function DashboardAppPage() {
         setDashboardData(response?.data?.data);
       } catch (error) {
         // Handle error
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -70,6 +73,7 @@ export default function DashboardAppPage() {
               title="Total Users"
               total={String(dashboardData?.totalUsers)}
               icon={"raphael:users"}
+              loading={loading}
             />
           </Grid>
 
@@ -79,6 +83,7 @@ export default function DashboardAppPage() {
               total={String(dashboardData?.totalOrders)}
               color="info"
               icon={"material-symbols:draft-orders-rounded"}
+              loading={loading}
             />
           </Grid>
 
@@ -88,6 +93,7 @@ export default function DashboardAppPage() {
               total={String(dashboardData?.totalMessages)}
               color="warning"
               icon={"bi:chat-fill"}
+              loading={loading}
             />
           </Grid>
 
@@ -97,6 +103,7 @@ export default function DashboardAppPage() {
               total={String(dashboardData?.totalComplaints)}
               color="error"
               icon={"ant-design:bug-filled"}
+              loading={loading}
             />
           </Grid>
 

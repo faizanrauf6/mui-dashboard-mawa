@@ -52,7 +52,7 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     if (!user) {
-      getCurrentUser();
+      localStorage.getItem('token') && getCurrentUser();
     }
   }, [user]);
 

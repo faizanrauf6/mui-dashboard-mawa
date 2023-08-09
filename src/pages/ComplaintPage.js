@@ -1,7 +1,7 @@
-import { Helmet } from 'react-helmet-async';
-import { filter } from 'lodash';
-import { sentenceCase } from 'change-case';
-import { useState } from 'react';
+import { Helmet } from "react-helmet-async";
+import { filter } from "lodash";
+import { sentenceCase } from "change-case";
+import { useEffect, useState } from "react";
 // @mui
 import {
   Card,
@@ -21,25 +21,30 @@ import {
   IconButton,
   TableContainer,
   TablePagination,
-} from '@mui/material';
+} from "@mui/material";
 // components
-import Label from '../components/label';
-import Iconify from '../components/iconify';
-import Scrollbar from '../components/scrollbar';
+import Label from "../components/label";
+import Iconify from "../components/iconify";
+import Scrollbar from "../components/scrollbar";
 // sections
-import { UserListHead } from '../sections/@dashboard/user';
+import { UserListHead } from "../sections/@dashboard/user";
 // mock
-import USERLIST from '../_mock/user';
+import USERLIST from "../_mock/user";
+import request from "src/utils/request";
+import { api } from "src/constants";
+import { useSelector } from "react-redux";
+import moment from "moment";
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name', alignRight: false },
-  { id: 'company', label: 'Company', alignRight: false },
-  { id: 'role', label: 'Role', alignRight: false },
-  { id: 'isVerified', label: 'Verified', alignRight: false },
-  { id: 'status', label: 'Status', alignRight: false },
-  { id: '' },
+  // { id: 'complaintUuid', label: 'Complaint UUID', alignRight: false },
+  { id: "complaintBy", label: "Complaint By", alignRight: false },
+  { id: "complaintAgainst", label: "Complaint Against", alignRight: false },
+  { id: "description", label: "Description", alignRight: false },
+  { id: "status", label: "Status", alignRight: false },
+  { id: "createdAt", label: "CreatedAt", alignRight: false },
+  { id: "" },
 ];
 
 // ----------------------------------------------------------------------
@@ -55,7 +60,7 @@ function descendingComparator(a, b, orderBy) {
 }
 
 function getComparator(order, orderBy) {
-  return order === 'desc'
+  return order === "desc"
     ? (a, b) => descendingComparator(a, b, orderBy)
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
@@ -77,19 +82,55 @@ function applySortFilter(array, comparator, query) {
 }
 
 export default function ComplaintPage() {
+  const { user } = useSelector((state) => state.user);
+
   const [open, setOpen] = useState(null);
-
   const [page, setPage] = useState(0);
-
-  const [order, setOrder] = useState('asc');
-
+  const [order, setOrder] = useState("asc");
   const [selected, setSelected] = useState([]);
-
-  const [orderBy, setOrderBy] = useState('name');
-
-  const [filterName, setFilterName] = useState('');
-
+  const [orderBy, setOrderBy] = useState("name");
+  const [filterName, setFilterName] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [complaints, setComplaints] = useState([]);
+  // const [loading, setLoading] = useState(true);
+  const [loadingStatus, setLoadingStatus] = useState({
+    state: "loading",
+    message: "Complaints are loading...",
+  });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await request.post(api.complaints, {
+          userId: user._id,
+        });
+        console.log(response);
+        console.log(response?.data?.data.length);
+        setComplaints(response?.data?.data);
+        setLoadingStatus({
+          state: "success",
+          message: "Complaints loaded successfully!",
+        });
+      } catch (error) {
+        // Handle error
+        if (error?.response) {
+          setLoadingStatus({
+            state: "error",
+            message: error.response.data.message,
+          });
+        } else {
+          setLoadingStatus({
+            state: "error",
+            message: "Something went wrong!",
+          });
+        }
+      }
+    };
+
+    if (user?._id) {
+      fetchData();
+    }
+  }, [user]);
 
   const handleOpenMenu = (event) => {
     setOpen(event.currentTarget);
@@ -100,8 +141,8 @@ export default function ComplaintPage() {
   };
 
   const handleRequestSort = (event, property) => {
-    const isAsc = orderBy === property && order === 'asc';
-    setOrder(isAsc ? 'desc' : 'asc');
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
     setOrderBy(property);
   };
 
@@ -147,15 +188,15 @@ export default function ComplaintPage() {
   // };
 
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - USERLIST.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - complaints.length) : 0;
 
-  const filteredUsers = applySortFilter(
-    USERLIST,
+  const filteredComplaints = applySortFilter(
+    complaints,
     getComparator(order, orderBy),
     filterName
   );
 
-  const isNotFound = !filteredUsers.length && !!filterName;
+  const isNotFound = !filteredComplaints.length && !!filterName;
 
   return (
     <>
@@ -165,13 +206,13 @@ export default function ComplaintPage() {
 
       <Container>
         <Stack
-          direction='row'
-          alignItems='center'
-          justifyContent='space-between'
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
           mb={5}
         >
-          <Typography variant='h4' gutterBottom>
-            Complaints
+          <Typography variant="h4" gutterBottom>
+            Complaints ({complaints.length})
           </Typography>
           {/* <Button
             variant='contained'
@@ -201,74 +242,105 @@ export default function ComplaintPage() {
                   // onSelectAllClick={handleSelectAllClick}
                 />
                 <TableBody>
-                  {filteredUsers
+                  {filteredComplaints
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row) => {
                       const {
-                        id,
-                        name,
-                        role,
+                        _id,
+                        complaintUUID,
+                        complaintBy,
+                        complaintAgainst,
+                        complaintFile,
                         status,
-                        company,
-                        avatarUrl,
-                        isVerified,
+                        description,
+                        createdAt,
                       } = row;
-                      const selectedUser = selected.indexOf(name) !== -1;
+                      const selectedUser =
+                        selected.indexOf(complaintUUID) !== -1;
 
                       return (
                         <TableRow
                           hover
-                          key={id}
+                          key={_id}
                           tabIndex={-1}
-                          role='checkbox'
+                          role="checkbox"
                           selected={selectedUser}
                         >
                           {/* <TableCell padding="checkbox">
                           <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} />
                         </TableCell> */}
 
+                          {/* <TableCell align='left'>{_id}</TableCell> */}
+
                           <TableCell
-                            component='th'
-                            scope='row'
-                            padding='normal'
+                            component="th"
+                            scope="row"
+                            padding="normal"
                           >
                             <Stack
-                              direction='row'
-                              alignItems='center'
+                              direction="row"
+                              alignItems="center"
                               spacing={2}
                             >
-                              <Avatar alt={name} src={avatarUrl} />
-                              <Typography variant='subtitle2' noWrap>
-                                {name}
+                              <Avatar
+                                alt={complaintBy?.fullName}
+                                src={
+                                  complaintBy?.profilePic ||
+                                  "/assets/images/avatars/avatar_default.jpg"
+                                }
+                              />
+                              <Typography variant="subtitle2" noWrap>
+                                {complaintBy?.fullName}
                               </Typography>
                             </Stack>
                           </TableCell>
 
-                          <TableCell align='left'>{company}</TableCell>
-
-                          <TableCell align='left'>{role}</TableCell>
-
-                          <TableCell align='left'>
-                            {isVerified ? 'Yes' : 'No'}
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            padding="normal"
+                          >
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing={2}
+                            >
+                              <Avatar
+                                alt={complaintAgainst?.fullName}
+                                src={
+                                  complaintAgainst?.profilePic ||
+                                  "/assets/images/avatars/avatar_default.jpg"
+                                }
+                              />
+                              <Typography variant="subtitle2" noWrap>
+                                {complaintAgainst?.fullName}
+                              </Typography>
+                            </Stack>
                           </TableCell>
 
-                          <TableCell align='left'>
+                          <TableCell align="left">{description}</TableCell>
+
+                          <TableCell align="left">
                             <Label
                               color={
-                                (status === 'banned' && 'error') || 'success'
+                                (status === "Pending" && "error") || "success"
                               }
                             >
                               {sentenceCase(status)}
                             </Label>
                           </TableCell>
 
-                          <TableCell align='right'>
+                          <TableCell align="left">
+                            {moment(createdAt).format("YYYY-MM-DD hh:mm A")}
+                          </TableCell>
+                          <TableCell align="right">
                             <IconButton
-                              size='large'
-                              color='inherit'
+                              size="large"
+                              color="inherit"
+                              disabled={status !== "Pending"}
                               onClick={handleOpenMenu}
                             >
-                              <Iconify icon={'eva:more-vertical-fill'} />
+                              <Iconify icon={"eva:more-vertical-fill"} />
                             </IconButton>
                           </TableCell>
                         </TableRow>
@@ -281,24 +353,17 @@ export default function ComplaintPage() {
                   )}
                 </TableBody>
 
-                {isNotFound && (
+                {loadingStatus.state !== "success" && (
                   <TableBody>
                     <TableRow>
-                      <TableCell align='center' colSpan={6} sx={{ py: 3 }}>
+                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
                         <Paper
                           sx={{
-                            textAlign: 'center',
+                            textAlign: "center",
                           }}
                         >
-                          <Typography variant='h6' paragraph>
-                            Not found
-                          </Typography>
-
-                          <Typography variant='body2'>
-                            No results found for &nbsp;
-                            <strong>&quot;{filterName}&quot;</strong>.
-                            <br /> Try checking for typos or using complete
-                            words.
+                          <Typography variant="h6" paragraph>
+                            {loadingStatus.message}
                           </Typography>
                         </Paper>
                       </TableCell>
@@ -311,8 +376,8 @@ export default function ComplaintPage() {
 
           <TablePagination
             rowsPerPageOptions={[5, 10, 25]}
-            component='div'
-            count={USERLIST.length}
+            component="div"
+            count={complaints.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -325,28 +390,28 @@ export default function ComplaintPage() {
         open={Boolean(open)}
         anchorEl={open}
         onClose={handleCloseMenu}
-        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
         PaperProps={{
           sx: {
             p: 1,
             width: 140,
-            '& .MuiMenuItem-root': {
+            "& .MuiMenuItem-root": {
               px: 1,
-              typography: 'body2',
+              typography: "body2",
               borderRadius: 0.75,
             },
           },
         }}
       >
-        <MenuItem>
+        {/* <MenuItem>
           <Iconify icon={'eva:edit-fill'} sx={{ mr: 2 }} />
-          Edit
-        </MenuItem>
+          Change Status
+        </MenuItem> */}
 
-        <MenuItem sx={{ color: 'error.main' }}>
-          <Iconify icon={'eva:trash-2-outline'} sx={{ mr: 2 }} />
-          Delete
+        <MenuItem sx={{ color: "error.main", width: 180 }}>
+          <Iconify icon={"eva:edit-fill"} sx={{ mr: 1 }} />
+          Change Status
         </MenuItem>
       </Popover>
     </>
