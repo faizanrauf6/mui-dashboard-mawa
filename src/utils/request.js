@@ -1,9 +1,9 @@
-import axios from "axios";
+import axios from 'axios';
 
-import NProgress from "nprogress";
+import NProgress from 'nprogress';
 // import { toast } from "react-toastify";
-import { config } from "../constants";
-import { toast } from "react-toastify";
+import { config } from '../constants';
+import { toast } from 'react-toastify';
 const request = axios.create({
   baseURL: config.base_url,
   timeout: config.time_out,
@@ -11,13 +11,19 @@ const request = axios.create({
 
 request.interceptors.request.use(
   (config) => {
-    config.headers.Authorization = localStorage.getItem("token")
-      ? `Bearer ${localStorage.getItem("token")}`
-      : "";
+    config.headers.Authorization = localStorage.getItem('token')
+      ? `Bearer ${localStorage.getItem('token')}`
+      : '';
+    document.querySelectorAll('*').forEach((ele) => {
+      ele.classList.add('p-event-none');
+    });
     NProgress.start();
     return config;
   },
   (error) => {
+    document.querySelectorAll('*').forEach((ele) => {
+      ele.classList.remove('p-event-none');
+    });
     NProgress.done();
     // check if error is section timeout
     return Promise.reject(error);
@@ -27,24 +33,30 @@ request.interceptors.request.use(
 request.interceptors.response.use(
   (response) => {
     NProgress.done();
+    document.querySelectorAll('*').forEach((ele) => {
+      ele.classList.remove('p-event-none');
+    });
     return response;
   },
   (error) => {
     NProgress.done();
-    if (error.message.includes("5000")) {
-      toast.error("Internal Server Error");
+    document.querySelectorAll('*').forEach((ele) => {
+      ele.classList.remove('p-event-none');
+    });
+    if (error.message.includes('5000')) {
+      toast.error('Internal Server Error');
     } else if (error.response) {
       toast.error(error?.response?.data?.message);
     } else {
       toast.error(error?.message);
     }
     if (error?.response?.status === 401) {
-      document.querySelectorAll("*").forEach((ele) => {
-        ele.style.pointerEvents = "none";
+      document.querySelectorAll('*').forEach((ele) => {
+        ele.style.pointerEvents = 'none';
       });
       // logout user from store
-      localStorage.removeItem("token");
-      toast.error("Session expired, please login again.");
+      localStorage.removeItem('token');
+      toast.error('Session expired, please login again.');
 
       setTimeout(() => {
         window.location.reload();

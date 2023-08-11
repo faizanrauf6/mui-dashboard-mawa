@@ -30,7 +30,7 @@ export default function DashboardAppPage() {
   const { user } = useSelector((state) => state.user);
   const [dashboardData, setDashboardData] = useState({
     totalUsers: 0,
-    totalOrders: 0,
+    totalTasks: 0,
     totalMessages: 0,
     totalMessagesCount: 0,
   });
@@ -80,7 +80,7 @@ export default function DashboardAppPage() {
           <Grid item xs={12} sm={6} md={3}>
             <AppWidgetSummary
               title="Total Tasks"
-              total={String(dashboardData?.totalOrders)}
+              total={String(dashboardData?.totalTasks)}
               color="info"
               icon={"material-symbols:draft-orders-rounded"}
               loading={loading}

@@ -22,6 +22,12 @@ import {
   TableContainer,
   TablePagination,
   Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
 } from "@mui/material";
 // components
 import Label from "../components/label";
@@ -35,6 +41,7 @@ import request from "src/utils/request";
 import { api } from "src/constants";
 import { useSelector } from "react-redux";
 import moment from "moment";
+import { toast } from "react-toastify";
 
 // ----------------------------------------------------------------------
 
@@ -43,7 +50,9 @@ const TABLE_HEAD = [
   { id: "complaintBy", label: "Complaint By", alignRight: false },
   { id: "complaintAgainst", label: "Complaint Against", alignRight: false },
   { id: "description", label: "Description", alignRight: false },
+  { id: "file", label: "Attachment", alignRight: false },
   { id: "status", label: "Status", alignRight: false },
+  { id: "notes", label: "Notes", alignRight: false },
   { id: "createdAt", label: "CreatedAt", alignRight: false },
   { id: "" },
 ];
@@ -94,47 +103,121 @@ export default function ComplaintPage() {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [complaints, setComplaints] = useState([]);
   // const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState({
     state: "loading",
     message: "Complaints are loading...",
   });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogAction, setDialogAction] = useState("");
+  const [notes, setNotes] = useState("");
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState("");
+
+  const handleDialogOpen = (action) => {
+    setDialogAction(action);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setNotes("");
+  };
+
+  const handleConfirmDialog = async () => {
+    try {
+      if (dialogAction === "Resolve") {
+        await handleResolve(selectedId, notes);
+      } else if (dialogAction === "Reject") {
+        await handleReject(selectedId, notes);
+      }
+      handleDialogClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchData = async () => {
+    setLoadingStatus({
+      state: "loading",
+      message: "Complaints are loading...",
+    });
+    setComplaints([]);
+    try {
+      const response = await request.post(api.complaints, {
+        userId: user._id,
+      });
+
+      setComplaints(response?.data?.data);
+      setLoadingStatus({
+        state: "success",
+        message: "Complaints loaded successfully!",
+      });
+    } catch (error) {
+      // Handle error
+      if (error?.response) {
+        setLoadingStatus({
+          state: "error",
+          message: error.response.data.message,
+        });
+      } else {
+        setLoadingStatus({
+          state: "error",
+          message: "Something went wrong!",
+        });
+      }
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await request.post(api.complaints, {
-          userId: user._id,
-        });
-        console.log(response);
-        console.log(response?.data?.data.length);
-        setComplaints(response?.data?.data);
-        setLoadingStatus({
-          state: "success",
-          message: "Complaints loaded successfully!",
-        });
-      } catch (error) {
-        // Handle error
-        if (error?.response) {
-          setLoadingStatus({
-            state: "error",
-            message: error.response.data.message,
-          });
-        } else {
-          setLoadingStatus({
-            state: "error",
-            message: "Something went wrong!",
-          });
-        }
-      }
-    };
-
     if (user?._id) {
       fetchData();
     }
   }, [user]);
 
-  const handleOpenMenu = (event) => {
+  const handleReject = async (complaintId, notes) => {
+    console.log(`Rejecting complaint with ID: ${complaintId}`);
+    try {
+      const response = await request.post(api.changeComplaintStatus, {
+        userId: user._id,
+        complaintId: complaintId,
+        status: "Rejected",
+        notes: notes,
+      });
+      toast.success(response?.data?.message || "Complaint status updated");
+      setOpen(null);
+      // Get latest data
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleResolve = async (complaintId, notes) => {
+    console.log(`Resolving complaint with ID: ${complaintId}`);
+    try {
+      const response = await request.post(api.changeComplaintStatus, {
+        userId: user._id,
+        complaintId: complaintId,
+        status: "Resolved",
+        notes: notes,
+      });
+      toast.success(response?.data?.message || "Complaint status updated");
+      setOpen(null);
+      // Get latest data
+      fetchData();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // const handleOpenMenu = (event) => {
+  //   setOpen(event.currentTarget);
+  // };
+
+  const handleOpenMenu = (event, id) => {
     setOpen(event.currentTarget);
+    setSelectedId(id);
   };
 
   const handleCloseMenu = () => {
@@ -198,6 +281,7 @@ export default function ComplaintPage() {
   );
 
   const isNotFound = !filteredComplaints.length && !!filterName;
+  const isConfirmDisabled = notes.length < 3; // Disable Confirm button if notes are too short
 
   return (
     <>
@@ -254,6 +338,7 @@ export default function ComplaintPage() {
                         complaintFile,
                         status,
                         description,
+                        notes,
                         createdAt,
                       } = row;
                       const selectedUser =
@@ -289,13 +374,21 @@ export default function ComplaintPage() {
                                   complaintBy?.profilePic ||
                                   "/assets/images/avatars/avatar_default.jpg"
                                 }
+                                onClick={() => {
+                                  setSelectedImage(
+                                    complaintBy?.profilePic ||
+                                      "/assets/images/avatars/avatar_default.jpg"
+                                  );
+                                  setImageDialogOpen(true);
+                                }}
+                                style={{ cursor: "pointer" }}
                               />
                               <Stack direction="column">
                                 <Typography variant="subtitle2" noWrap>
                                   {complaintBy?.fullName}
                                 </Typography>
                                 <Typography variant="subtitle3" noWrap>
-                                  (Employer)
+                                  ({complaintBy?.userType})
                                 </Typography>
                               </Stack>
                             </Stack>
@@ -317,13 +410,21 @@ export default function ComplaintPage() {
                                   complaintAgainst?.profilePic ||
                                   "/assets/images/avatars/avatar_default.jpg"
                                 }
+                                onClick={() => {
+                                  setSelectedImage(
+                                    complaintAgainst?.profilePic ||
+                                      "/assets/images/avatars/avatar_default.jpg"
+                                  );
+                                  setImageDialogOpen(true);
+                                }}
+                                style={{ cursor: "pointer" }}
                               />
                               <Stack direction="column">
                                 <Typography variant="subtitle2" noWrap>
                                   {complaintAgainst?.fullName}
                                 </Typography>
                                 <Typography variant="subtitle3" noWrap>
-                                  (Worker)
+                                  ({complaintAgainst?.userType})
                                 </Typography>
                               </Stack>
                             </Stack>
@@ -331,10 +432,45 @@ export default function ComplaintPage() {
 
                           <TableCell align="left">{description}</TableCell>
 
+                          <TableCell
+                            component="th"
+                            scope="row"
+                            padding="normal"
+                          >
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              spacing={1}
+                            >
+                              <Avatar
+                                alt={complaintAgainst?.fullName}
+                                src={
+                                  complaintFile ||
+                                  "/assets/images/avatars/avatar_default.jpg"
+                                }
+                                onClick={() => {
+                                  setSelectedImage(
+                                    complaintFile ||
+                                      "/assets/images/avatars/avatar_default.jpg"
+                                  );
+                                  setImageDialogOpen(true);
+                                }}
+                                style={{ cursor: "pointer" }}
+                              />
+                            </Stack>
+                          </TableCell>
+
                           <TableCell align="left">
                             <Label
+                              // color={
+                              //   (status === 'Pending' && 'error') || 'success'
+                              // }
                               color={
-                                (status === "Pending" && "error") || "success"
+                                status === "Pending"
+                                  ? "info"
+                                  : status === "Resolved"
+                                  ? "success"
+                                  : "error"
                               }
                             >
                               {sentenceCase(status)}
@@ -342,14 +478,19 @@ export default function ComplaintPage() {
                           </TableCell>
 
                           <TableCell align="left">
-                            {moment(createdAt).format("YYYY-MM-DD hh:mm A")}
+                            {notes ? notes : "No notes"}
+                          </TableCell>
+
+                          <TableCell align="left">
+                            {moment(createdAt).format("DD-MM-YY hh:mm A")}
                           </TableCell>
                           <TableCell align="right">
                             <IconButton
                               size="large"
                               color="inherit"
                               disabled={status !== "Pending"}
-                              onClick={handleOpenMenu}
+                              onClick={(event) => handleOpenMenu(event, _id)}
+                              // onClick={handleOpenMenu}
                             >
                               <Iconify icon={"eva:more-vertical-fill"} />
                             </IconButton>
@@ -420,18 +561,81 @@ export default function ComplaintPage() {
           Change Status
         </MenuItem> */}
 
-        <MenuItem sx={{ color: "success.main" }}>
+        <MenuItem
+          sx={{ color: "success.main" }}
+          onClick={() => handleDialogOpen("Resolve")}
+          // onClick={() => handleResolve(selectedId)}
+        >
           <Iconify icon={"teenyicons:file-tick-outline"} sx={{ mr: 1 }} />
           Resolve
         </MenuItem>
 
         <Divider />
 
-        <MenuItem sx={{ color: "error.main" }}>
+        <MenuItem
+          sx={{ color: "error.main" }}
+          onClick={() => handleDialogOpen("Reject")}
+          // onClick={() => handleReject(selectedId)}
+        >
           <Iconify icon={"ri:file-excel-line"} sx={{ mr: 1 }} />
           Reject
         </MenuItem>
       </Popover>
+
+      {/* Dialog for Resolve or Reject */}
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>
+          {dialogAction === "Resolve" ? "Resolve" : "Reject"} Complaint
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to {dialogAction.toLowerCase()} this
+            complaint?
+          </DialogContentText>
+          <TextField
+            fullWidth
+            multiline
+            rows={4}
+            variant="outlined"
+            label="Notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={handleDialogClose}
+            variant="outlined"
+            color="primary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleConfirmDialog}
+            variant="outlined"
+            color="primary"
+            disabled={isConfirmDisabled}
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog for open image */}
+      <Dialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        maxWidth="md"
+      >
+        <DialogContent>
+          <img
+            src={selectedImage}
+            alt="Full Size"
+            style={{ width: "100%", height: "auto", display: "block" }}
+          />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

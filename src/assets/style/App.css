@@ -2,3 +2,7 @@
   z-index: 999999;
   position: relative;
 }
+
+.p-event-none {
+  pointer-events: none !important ;
+}

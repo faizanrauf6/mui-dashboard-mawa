@@ -7,6 +7,7 @@ const api = {
   },
   dashboardInfo: 'users/dashboard',
   complaints: 'complaints/all',
+  changeComplaintStatus: 'complaints/update-status',
 };
 
 export default api;
