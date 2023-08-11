@@ -429,6 +429,7 @@ export default function ComplaintPage() {
                               </Stack>
                             </Stack>
                           </TableCell>
+                          
 
                           <TableCell align="left">{description}</TableCell>
 
