@@ -17,6 +17,7 @@ import { api } from "src/constants";
 import { toast } from "react-toastify";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser, clearUser, login } from "src/store/userSlice";
+import { object, string } from "yup";
 
 // ----------------------------------------------------------------------
 
@@ -25,7 +26,13 @@ export default function LoginForm() {
   const { user, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
 
+  let userSchema = object({
+    username: string().required("Username is required"),
+    password: string().required("Password is required"),
+  });
+
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [userDetails, setUserDetails] = useState({
     username: "",
@@ -36,6 +43,19 @@ export default function LoginForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      await userSchema.validate(userDetails, { abortEarly: false });
+      loginUser();
+    } catch (validationError) {
+      const newErrors = {};
+      validationError.inner.forEach((error) => {
+        newErrors[error.path] = error.message;
+      });
+      setErrors(newErrors);
+    }
+  };
+
+  const loginUser = async () => {
     try {
       const response = await login(userDetails)(dispatch);
       toast.success(response?.data?.message || "Signin successful");
@@ -64,13 +84,16 @@ export default function LoginForm() {
   // };
 
   return (
-    <form onSubmit={handleSubmit}>
+    // < onSubmit={handleSubmit}>
+    <>
       <Stack spacing={3}>
         <TextField
           name="username"
           label="Enter username"
           value={userDetails.username}
           onChange={handleInputChange}
+          error={!!errors.username}
+          helperText={errors.username}
         />
 
         <TextField
@@ -79,6 +102,8 @@ export default function LoginForm() {
           type={showPassword ? "text" : "password"}
           value={userDetails.password}
           onChange={handleInputChange}
+          error={!!errors.password}
+          helperText={errors.password}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -113,10 +138,16 @@ export default function LoginForm() {
           Loading...
         </LoadingButton>
       ) : (
-        <LoadingButton fullWidth size="large" type="submit" variant="contained">
+        <LoadingButton
+          fullWidth
+          size="large"
+          type="submit"
+          variant="contained"
+          onClick={handleSubmit}
+        >
           Login
         </LoadingButton>
       )}
-    </form>
+    </>
   );
 }

@@ -381,7 +381,10 @@ export default function ComplaintPage() {
                                   );
                                   setImageDialogOpen(true);
                                 }}
-                                style={{ cursor: "pointer" }}
+                                style={{
+                                  cursor: "pointer",
+                                  border: "1px solid #d1d1d1",
+                                }}
                               />
                               <Stack direction="column">
                                 <Typography variant="subtitle2" noWrap>
@@ -417,7 +420,10 @@ export default function ComplaintPage() {
                                   );
                                   setImageDialogOpen(true);
                                 }}
-                                style={{ cursor: "pointer" }}
+                                style={{
+                                  cursor: "pointer",
+                                  border: "1px solid #d1d1d1",
+                                }}
                               />
                               <Stack direction="column">
                                 <Typography variant="subtitle2" noWrap>
@@ -429,7 +435,6 @@ export default function ComplaintPage() {
                               </Stack>
                             </Stack>
                           </TableCell>
-                          
 
                           <TableCell align="left">{description}</TableCell>
 
@@ -456,7 +461,10 @@ export default function ComplaintPage() {
                                   );
                                   setImageDialogOpen(true);
                                 }}
-                                style={{ cursor: "pointer" }}
+                                style={{
+                                  cursor: "pointer",
+                                  border: "1px solid #d1d1d1",
+                                }}
                               />
                             </Stack>
                           </TableCell>

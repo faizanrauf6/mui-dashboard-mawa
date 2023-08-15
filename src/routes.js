@@ -12,10 +12,24 @@ import Page404 from './pages/Page404';
 import OutingsPage from './pages/OutingsPage';
 import DashboardAppPage from './pages/DashboardAppPage';
 import NonRequiredAuth from './components/common/NonRequiredAuth';
-
+import { useEffect } from 'react';
+import { systemLanguages } from './store/userSlice';
+import { useDispatch } from "react-redux";
 // ----------------------------------------------------------------------
 
 export default function Router() {
+  const dispatch = useDispatch();
+  useEffect(() => {
+    async function fetchLanguages() {
+      try {
+        await systemLanguages()(dispatch);
+      } catch (error) {
+        console.error("Error fetching languages:", error);
+      }
+    }
+
+    fetchLanguages();
+  }, []);
   const routes = useRoutes([
     {
       path: '/dashboard',

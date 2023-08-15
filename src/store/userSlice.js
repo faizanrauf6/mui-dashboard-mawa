@@ -8,8 +8,13 @@ const userSlice = createSlice({
   initialState: {
     user: null,
     loading: false,
+    languages: [],
   },
   reducers: {
+    setLanguages: (state, action) => {
+      state.languages = action.payload;
+      state.loading = false;
+    },
     setUser: (state, action) => {
       state.user = action.payload;
       state.loading = false;
@@ -23,22 +28,24 @@ const userSlice = createSlice({
   },
 });
 
-export const { setUser, clearUser, setLoading } = userSlice.actions;
+export const { setLanguages, setUser, clearUser, setLoading } =
+  userSlice.actions;
 
-export const login = (credentials) => (dispatch) => new Promise(async (resolve, reject) => {
-  try {
-    dispatch(setLoading(true));
-    const response = await request.post(api.auth.login, credentials); // Replace with your login API call
-    localStorage.setItem("token", response?.data?.token || "");
-    dispatch(setUser(response?.data?.data)); // Assuming the API returns user data
-    resolve(response);
-  } catch (error) {
-    // Handle error if needed
-    reject(error);
-  } finally {
-    dispatch(setLoading(false));
-  }
-});
+export const login = (credentials) => (dispatch) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await request.post(api.auth.login, credentials); // Replace with your login API call
+      localStorage.setItem("token", response?.data?.token || "");
+      dispatch(setUser(response?.data?.data)); // Assuming the API returns user data
+      resolve(response);
+    } catch (error) {
+      // Handle error if needed
+      reject(error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  });
 
 export const fetchMe = () => async (dispatch) => {
   return new Promise(async (resolve, reject) => {
@@ -74,4 +81,20 @@ export const logout = (userId) => async (dispatch) => {
     }
   });
 };
+
+export const systemLanguages = () => (dispatch) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      dispatch(setLoading(true));
+      const response = await request.get(api.languages);
+      dispatch(setLanguages(response?.data?.data)); // Assuming the API returns user data
+      resolve(response);
+    } catch (error) {
+      // Handle error if needed
+      reject(error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  });
+
 export default userSlice.reducer;
