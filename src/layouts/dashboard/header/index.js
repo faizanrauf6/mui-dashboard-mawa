@@ -9,6 +9,7 @@ import Iconify from "../../../components/iconify";
 //
 import Searchbar from "./Searchbar";
 import AccountPopover from "./AccountPopover";
+import ThemePopover from "./themePopover";
 import LanguagePopover from "./LanguagePopover";
 import NotificationsPopover from "./NotificationsPopover";
 
@@ -42,7 +43,7 @@ Header.propTypes = {
   onOpenNav: PropTypes.func,
 };
 
-export default function Header({ onOpenNav }) {
+export default function Header({ onOpenNav, setTheme, applicationTheme }) {
   return (
     <StyledRoot className="dashboard-header">
       <StyledToolbar>
@@ -68,6 +69,10 @@ export default function Header({ onOpenNav }) {
             sm: 1,
           }}
         >
+          <ThemePopover
+            setTheme={setTheme}
+            applicationTheme={applicationTheme}
+          />
           {/* <LanguagePopover /> */}
           {/* <NotificationsPopover /> */}
           <AccountPopover />

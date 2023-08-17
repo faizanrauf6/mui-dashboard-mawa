@@ -28,6 +28,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  Skeleton,
 } from "@mui/material";
 // components
 import Label from "../components/label";
@@ -316,222 +317,240 @@ export default function ComplaintPage() {
 
           <Scrollbar>
             <TableContainer sx={{ minWidth: 800 }}>
-              <Table>
-                <UserListHead
-                  order={order}
-                  orderBy={orderBy}
-                  headLabel={TABLE_HEAD}
-                  // rowCount={USERLIST.length}
-                  // numSelected={selected.length}
-                  onRequestSort={handleRequestSort}
-                  // onSelectAllClick={handleSelectAllClick}
-                />
-                <TableBody>
-                  {filteredComplaints
-                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                    .map((row) => {
-                      const {
-                        _id,
-                        complaintUUID,
-                        complaintBy,
-                        complaintAgainst,
-                        complaintFile,
-                        status,
-                        description,
-                        notes,
-                        createdAt,
-                      } = row;
-                      const selectedUser =
-                        selected.indexOf(complaintUUID) !== -1;
+              {loadingStatus.state === "loading" ? (
+                <Table>
+                  <TableBody>
+                    {/* Replace this with your table rows */}
+                    {Array.from({ length: rowsPerPage }).map((_, index) => (
+                      <TableRow key={index}>
+                        <TableCell>
+                          <Skeleton variant="text" animation="wave" />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Table>
+                  <UserListHead
+                    order={order}
+                    orderBy={orderBy}
+                    headLabel={TABLE_HEAD}
+                    // rowCount={USERLIST.length}
+                    // numSelected={selected.length}
+                    onRequestSort={handleRequestSort}
+                    // onSelectAllClick={handleSelectAllClick}
+                  />
+                  <TableBody>
+                    {filteredComplaints
+                      .slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                      .map((row) => {
+                        const {
+                          _id,
+                          complaintUUID,
+                          complaintBy,
+                          complaintAgainst,
+                          complaintFile,
+                          status,
+                          description,
+                          notes,
+                          createdAt,
+                        } = row;
+                        const selectedUser =
+                          selected.indexOf(complaintUUID) !== -1;
 
-                      return (
-                        <TableRow
-                          hover
-                          key={_id}
-                          tabIndex={-1}
-                          role="checkbox"
-                          selected={selectedUser}
-                        >
-                          {/* <TableCell padding="checkbox">
+                        return (
+                          <TableRow
+                            hover
+                            key={_id}
+                            tabIndex={-1}
+                            role="checkbox"
+                            selected={selectedUser}
+                          >
+                            {/* <TableCell padding="checkbox">
                           <Checkbox checked={selectedUser} onChange={(event) => handleClick(event, name)} />
                         </TableCell> */}
 
-                          {/* <TableCell align='left'>{_id}</TableCell> */}
+                            {/* <TableCell align='left'>{_id}</TableCell> */}
 
-                          <TableCell
-                            component="th"
-                            scope="row"
-                            padding="normal"
-                          >
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              spacing={1}
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              padding="normal"
                             >
-                              <Avatar
-                                alt={complaintBy?.fullName}
-                                src={
-                                  complaintBy?.profilePic ||
-                                  "/assets/images/avatars/avatar_default.jpg"
-                                }
-                                onClick={() => {
-                                  setSelectedImage(
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={1}
+                              >
+                                <Avatar
+                                  alt={complaintBy?.fullName}
+                                  src={
                                     complaintBy?.profilePic ||
-                                      "/assets/images/avatars/avatar_default.jpg"
-                                  );
-                                  setImageDialogOpen(true);
-                                }}
-                                style={{
-                                  cursor: "pointer",
-                                  border: "1px solid #d1d1d1",
-                                }}
-                              />
-                              <Stack direction="column">
-                                <Typography variant="subtitle2" noWrap>
-                                  {complaintBy?.fullName}
-                                </Typography>
-                                <Typography variant="subtitle3" noWrap>
-                                  ({complaintBy?.userType})
-                                </Typography>
+                                    "/assets/images/avatars/avatar_default.jpg"
+                                  }
+                                  onClick={() => {
+                                    setSelectedImage(
+                                      complaintBy?.profilePic ||
+                                        "/assets/images/avatars/avatar_default.jpg"
+                                    );
+                                    setImageDialogOpen(true);
+                                  }}
+                                  style={{
+                                    cursor: "pointer",
+                                    border: "1px solid #d1d1d1",
+                                  }}
+                                />
+                                <Stack direction="column">
+                                  <Typography variant="subtitle2" noWrap>
+                                    {complaintBy?.fullName}
+                                  </Typography>
+                                  <Typography variant="subtitle3" noWrap>
+                                    ({complaintBy?.userType})
+                                  </Typography>
+                                </Stack>
                               </Stack>
-                            </Stack>
-                          </TableCell>
+                            </TableCell>
 
-                          <TableCell
-                            component="th"
-                            scope="row"
-                            padding="normal"
-                          >
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              spacing={1}
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              padding="normal"
                             >
-                              <Avatar
-                                alt={complaintAgainst?.fullName}
-                                src={
-                                  complaintAgainst?.profilePic ||
-                                  "/assets/images/avatars/avatar_default.jpg"
-                                }
-                                onClick={() => {
-                                  setSelectedImage(
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={1}
+                              >
+                                <Avatar
+                                  alt={complaintAgainst?.fullName}
+                                  src={
                                     complaintAgainst?.profilePic ||
-                                      "/assets/images/avatars/avatar_default.jpg"
-                                  );
-                                  setImageDialogOpen(true);
-                                }}
-                                style={{
-                                  cursor: "pointer",
-                                  border: "1px solid #d1d1d1",
-                                }}
-                              />
-                              <Stack direction="column">
-                                <Typography variant="subtitle2" noWrap>
-                                  {complaintAgainst?.fullName}
-                                </Typography>
-                                <Typography variant="subtitle3" noWrap>
-                                  ({complaintAgainst?.userType})
-                                </Typography>
+                                    "/assets/images/avatars/avatar_default.jpg"
+                                  }
+                                  onClick={() => {
+                                    setSelectedImage(
+                                      complaintAgainst?.profilePic ||
+                                        "/assets/images/avatars/avatar_default.jpg"
+                                    );
+                                    setImageDialogOpen(true);
+                                  }}
+                                  style={{
+                                    cursor: "pointer",
+                                    border: "1px solid #d1d1d1",
+                                  }}
+                                />
+                                <Stack direction="column">
+                                  <Typography variant="subtitle2" noWrap>
+                                    {complaintAgainst?.fullName}
+                                  </Typography>
+                                  <Typography variant="subtitle3" noWrap>
+                                    ({complaintAgainst?.userType})
+                                  </Typography>
+                                </Stack>
                               </Stack>
-                            </Stack>
-                          </TableCell>
+                            </TableCell>
 
-                          <TableCell align="left">{description}</TableCell>
+                            <TableCell align="left">{description}</TableCell>
 
-                          <TableCell
-                            component="th"
-                            scope="row"
-                            padding="normal"
-                          >
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              spacing={1}
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              padding="normal"
                             >
-                              <Avatar
-                                alt={complaintAgainst?.fullName}
-                                src={
-                                  complaintFile ||
-                                  "/assets/images/avatars/avatar_default.jpg"
-                                }
-                                onClick={() => {
-                                  setSelectedImage(
+                              <Stack
+                                direction="row"
+                                alignItems="center"
+                                spacing={1}
+                              >
+                                <Avatar
+                                  alt={complaintAgainst?.fullName}
+                                  src={
                                     complaintFile ||
-                                      "/assets/images/avatars/avatar_default.jpg"
-                                  );
-                                  setImageDialogOpen(true);
-                                }}
-                                style={{
-                                  cursor: "pointer",
-                                  border: "1px solid #d1d1d1",
-                                }}
-                              />
-                            </Stack>
-                          </TableCell>
+                                    "/assets/images/avatars/avatar_default.jpg"
+                                  }
+                                  onClick={() => {
+                                    setSelectedImage(
+                                      complaintFile ||
+                                        "/assets/images/avatars/avatar_default.jpg"
+                                    );
+                                    setImageDialogOpen(true);
+                                  }}
+                                  style={{
+                                    cursor: "pointer",
+                                    border: "1px solid #d1d1d1",
+                                  }}
+                                />
+                              </Stack>
+                            </TableCell>
 
-                          <TableCell align="left">
-                            <Label
-                              // color={
-                              //   (status === 'Pending' && 'error') || 'success'
-                              // }
-                              color={
-                                status === "Pending"
-                                  ? "info"
-                                  : status === "Resolved"
-                                  ? "success"
-                                  : "error"
-                              }
-                            >
-                              {sentenceCase(status)}
-                            </Label>
-                          </TableCell>
+                            <TableCell align="left">
+                              <Label
+                                // color={
+                                //   (status === 'Pending' && 'error') || 'success'
+                                // }
+                                color={
+                                  status === "Pending"
+                                    ? "info"
+                                    : status === "Resolved"
+                                    ? "success"
+                                    : "error"
+                                }
+                              >
+                                {sentenceCase(status)}
+                              </Label>
+                            </TableCell>
 
-                          <TableCell align="left">
-                            {notes ? notes : "No notes"}
-                          </TableCell>
+                            <TableCell align="left">
+                              {notes ? notes : "No notes"}
+                            </TableCell>
 
-                          <TableCell align="left">
-                            {moment(createdAt).format("DD-MM-YY hh:mm A")}
-                          </TableCell>
-                          <TableCell align="right">
-                            <IconButton
-                              size="large"
-                              color="inherit"
-                              disabled={status !== "Pending"}
-                              onClick={(event) => handleOpenMenu(event, _id)}
-                              // onClick={handleOpenMenu}
-                            >
-                              <Iconify icon={"eva:more-vertical-fill"} />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  {emptyRows > 0 && (
-                    <TableRow style={{ height: 53 * emptyRows }}>
-                      <TableCell colSpan={6} />
-                    </TableRow>
-                  )}
-                </TableBody>
-
-                {loadingStatus.state !== "success" && (
-                  <TableBody>
-                    <TableRow>
-                      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
-                        <Paper
-                          sx={{
-                            textAlign: "center",
-                          }}
-                        >
-                          <Typography variant="h6" paragraph>
-                            {loadingStatus.message}
-                          </Typography>
-                        </Paper>
-                      </TableCell>
-                    </TableRow>
+                            <TableCell align="left">
+                              {moment(createdAt).format("DD-MM-YY hh:mm A")}
+                            </TableCell>
+                            <TableCell align="right">
+                              <IconButton
+                                size="large"
+                                color="inherit"
+                                disabled={status !== "Pending"}
+                                onClick={(event) => handleOpenMenu(event, _id)}
+                                // onClick={handleOpenMenu}
+                              >
+                                <Iconify icon={"eva:more-vertical-fill"} />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    {emptyRows > 0 && (
+                      <TableRow style={{ height: 53 * emptyRows }}>
+                        <TableCell colSpan={6} />
+                      </TableRow>
+                    )}
                   </TableBody>
-                )}
-              </Table>
+
+                  {loadingStatus.state !== "success" && (
+                    <TableBody>
+                      <TableRow>
+                        <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+                          <Paper
+                            sx={{
+                              textAlign: "center",
+                            }}
+                          >
+                            <Typography variant="h6" paragraph>
+                              {loadingStatus.message}
+                            </Typography>
+                          </Paper>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  )}
+                </Table>
+              )}
             </TableContainer>
           </Scrollbar>
 

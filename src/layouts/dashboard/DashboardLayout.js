@@ -37,7 +37,7 @@ const Main = styled("div")(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function DashboardLayout() {
+export default function DashboardLayout({ setTheme, applicationTheme }) {
   const { user, loading } = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
@@ -52,7 +52,7 @@ export default function DashboardLayout() {
 
   useEffect(() => {
     if (!user) {
-      localStorage.getItem('token') && getCurrentUser();
+      localStorage.getItem("token") && getCurrentUser();
     }
   }, [user]);
 
@@ -63,7 +63,11 @@ export default function DashboardLayout() {
         <BaseLoader />
       ) : (
         <StyledRoot>
-          <Header onOpenNav={() => setOpen(true)} />
+          <Header
+            setTheme={setTheme}
+            applicationTheme={applicationTheme}
+            onOpenNav={() => setOpen(true)}
+          />
 
           <Nav openNav={open} onCloseNav={() => setOpen(false)} />
 

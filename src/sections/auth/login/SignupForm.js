@@ -121,6 +121,7 @@ export default function SignupForm() {
           onChange={handleInputChange}
           error={!!errors.username}
           helperText={errors.username}
+          autocomplete="off"
         />
         {/* {errors.username && (
           <FormHelperText error>{errors.username}</FormHelperText>
